@@ -1,0 +1,167 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum ProductCondition {
+  NEW
+  USED
+}
+
+enum IsAvailable {
+  SOLD
+  UNSOLD
+}
+
+enum OrderStatus {
+  PENDING
+  DELIVERED
+  CANCELLED
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id        String     @id @default(uuid())
+  fullname  String
+  email     String
+  password  String
+  phone     String
+  address   String
+  status    UserStatus @default(INACTIVE)
+  role      UserRole
+  regionId  String
+  region    Region     @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  orders    Order[]
+  reviews   Review[]
+  views     View[]
+  likes     Like[]
+  chats     Chat[]
+  sessions  Sessions[]
+  createdAt DateTime   @default(now())
+}
+
+model Order {
+  id         String      @id @default(uuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status     OrderStatus @default(PENDING)
+  colorItems ColorItem[]
+  createdAt  DateTime    @default(now())
+}
+
+model ColorItem {
+  id        String  @id @default(uuid())
+  colorId   String
+  color     Color   @relation(fields: [colorId], references: [id], onDelete: Restrict)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id          String           @id @default(uuid())
+  name        String
+  description String
+  price       Float
+  currency    String
+  image       String
+  discount    Int
+  condition   ProductCondition
+  isAvailable IsAvailable      @default(UNSOLD)
+  categoryId  String
+  category    Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  colorItems  ColorItem[]
+  reviews     Review[]
+  views       View[]
+  likes       Like[]
+  createdAt   DateTime         @default(now())
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  description String
+  image       String
+  products    Product[]
+  createdAt   DateTime  @default(now())
+}
+
+model Color {
+  id        String      @id @default(uuid())
+  colorName String
+  ColorItem ColorItem[]
+}
+
+model Region {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  User      User[]
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating    Float
+  comment   String
+  createdAt DateTime @default(now())
+}
+
+model View {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Chat {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model Sessions {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress  String
+  deviceInfo String
+  location   String
+  createdAt  DateTime @default(now())
+}
