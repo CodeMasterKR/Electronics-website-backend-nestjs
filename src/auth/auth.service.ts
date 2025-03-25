@@ -155,7 +155,7 @@ export class AuthService {
           status: user.status,
         });
 
-        return { refreshToken, accessToken };
+        return { refreshToken, accessToken, user};
       }
     } catch (error) {
       throw new BadRequestException(error.message)

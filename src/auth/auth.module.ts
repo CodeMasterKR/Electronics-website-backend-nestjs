@@ -6,7 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { MailModule } from 'src/services/mail/mail.module';
 
 @Module({
-  imports: [PrismaModule, 
+  imports: [PrismaModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '1h' }, 
